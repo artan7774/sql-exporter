@@ -1,0 +1,29 @@
+- num_products:
+    # Name of the driver to use.
+    driver: mysql
+
+    # Connection information.
+    connection:
+        host: localhost
+        port: 3306
+        user: zinger
+        password: zingit
+        database: production
+
+    # SQL string. Parameters are name-based (not positional) and must be
+    # prefixed with a colon. See `:category_id` in the query below for an example.
+    # Must return single row, single column
+    sql: >
+        select COUNT(*) as count from item2 where processing_state = 'failed' and created_time > DATE_SUB(NOW(), INTERVAL 1 HOUR) order by created_time desc
+    data-field: count
+    # Parameter values by name.
+    # params:
+    #     category_id: 5
+
+    # The time between query execution. This should be set relative to the frequency
+    # of expected updates and the required granularity of changes.
+    interval: 1h
+
+    # value on error, default is null
+    # if not null, when query has error, will use this value to indicate an error has occured
+    value-on-error: '-1'

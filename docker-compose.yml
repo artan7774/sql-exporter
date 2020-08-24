@@ -1,16 +1,36 @@
-sqlagent:
-    image: dbhi/sql-agent
+version: '3.7'
 
+networks:
+  mntrnet:
+    #name: mntrnet
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: ${MNTR_NET}
+    driver_opts:
+      com.docker.network.bridge.name: docker-br-mntr
 
-prometheussql:
-    image: dbhi/prometheus-sql
+volumes:
+  prometheus_data: {}
+services:
+    sqlagent:
+        image: dbhi/sql-agent
+        networks:
+            mntrnet:
+                ipv4_address: ${GRAF_IP}
+        ports: 
+            - 5000:5000
 
-    links:
-        - sqlagent:sqlagent
-
-    ports:
-        - 8080:8080
-
-    # Specify where the queries file is mounted on the host.
-    # volumes:
-    #    - /path/to/queries.yml:/queries.yml
+    prometheussql:
+        image: dbhi/prometheus-sql
+        networks:
+            mntrnet:
+                ipv4_address: ${PROM_IP}
+        links:
+            - sqlagent:sqlagent
+        ports:
+            - 8080:8080
+        # Specify where the queries file is mounted on the host.
+        volumes:
+            - ./queries.yml:/queries.yml
